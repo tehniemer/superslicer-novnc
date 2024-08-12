@@ -1,27 +1,26 @@
 # Get and install Easy noVNC.
-FROM golang:1.14-buster AS easy-novnc-build
+FROM golang:bullseye AS easy-novnc-build
 WORKDIR /src
 RUN go mod init build && \
     go get github.com/geek1011/easy-novnc@v1.1.0 && \
     go build -o /bin/easy-novnc github.com/geek1011/easy-novnc
 
 # Get TigerVNC and Supervisor for isolating the container.
-FROM debian:bookworm
+FROM debian:bullseye
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends openbox tigervnc-standalone-server supervisor gosu && \
     rm -rf /var/lib/apt/lists && \
     mkdir -p /usr/share/desktop-directories
 
-# # Get all of the remaining dependencies for the OS and VNC.
+# Get all of the remaining dependencies for the OS, VNC, and Cura (additionally Firefox-ESR to sign-in to Ultimaker if you'd like).
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends lxterminal nano wget openssh-client rsync ca-certificates xdg-utils htop tar xzip gzip bzip2 zip unzip && \
+    apt-get install -y --no-install-recommends openscad lxterminal nano wget openssh-client rsync ca-certificates xdg-utils htop tar xzip gzip bzip2 zip unzip && \
     rm -rf /var/lib/apt/lists
 
 RUN apt update && apt install -y --no-install-recommends --allow-unauthenticated \
         lxde gtk2-engines-murrine gnome-themes-standard gtk2-engines-pixbuf gtk2-engines-murrine arc-theme \
-        freeglut3 libgtk2.0-dev libwxgtk3.0-gtk3-dev libwx-perl libxmu-dev libgl1-mesa-glx libgl1-mesa-dri \
-        xdg-utils locales pcmanfm libgtk-3-dev libglew-dev libudev-dev libdbus-1-dev zlib1g-dev locales locales-all \
-        jq curl git firefox-esr \
+        freeglut3 libgtk2.0-dev libwxgtk3.0-gtk3-dev libwx-perl libxmu-dev libgl1-mesa-glx libgl1-mesa-dri  \
+        xdg-utils locales locales-all pcmanfm jq curl git firefox-esr qtbase5-dev \
     && apt autoclean -y \
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
